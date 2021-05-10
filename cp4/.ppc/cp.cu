@@ -38,6 +38,7 @@ __global__ void mykernel(float* result, const float* data, int nx, int ny) {
             }
             result[i + j*ny] = (size * sumJI - sumJ * sumI) 
             / (float)sqrt((size * squareSumJ - sumJ * sumJ) * (size * squareSumI - sumI * sumI));
+            printf("%d result", result[i + j*ny]);
         }
     }
 }
