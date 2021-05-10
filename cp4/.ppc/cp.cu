@@ -13,6 +13,7 @@ This is the function you need to implement. Quick reference:
 __global__ void mykernel(float* result, const float* data, int nx, int ny) {
     int i = threadIdx.x + blockIdx.x * blockDim.x;
     int j = threadIdx.y + blockIdx.y * blockDim.y;
+    float size = nx;
 
     for(i=i; i < ny; i++){
         float sumI = 0;
@@ -42,6 +43,13 @@ static inline void check(cudaError_t err, const char* context) {
         std::exit(EXIT_FAILURE);
     }
 }
+static inline int divup(int a, int b) {
+    return (a + b - 1)/b;
+}
+
+static inline int roundup(int a, int b) {
+    return divup(a, b) * b;
+}
 
 #define CHECK(x) check(x, #x)
 void correlate(int ny, int nx, const float *data, float *result) {
@@ -53,12 +61,12 @@ void correlate(int ny, int nx, const float *data, float *result) {
 
     // Run kernel
     dim3 dimBlock(16, 16);
-    dim3 dimGrid(divup(n, dimBlock.x), divup(n, dimBlock.y));
-    mykernel<<<dimGrid, dimBlock>>>(rGPU, dGPU, n);
+    dim3 dimGrid(divup(nx, dimBlock.x), divup(ny, dimBlock.y));
+    mykernel<<<dimGrid, dimBlock>>>(rGPU, dGPU, nx, ny);
     CHECK(cudaGetLastError());
 
     // Copy data back to CPU & release memory
-    CHECK(cudaMemcpy(r, rGPU, n * n * sizeof(float), cudaMemcpyDeviceToHost));
+    CHECK(cudaMemcpy(result, rGPU, nx * ny * sizeof(float), cudaMemcpyDeviceToHost));
     CHECK(cudaFree(dGPU));
     CHECK(cudaFree(rGPU));
     
