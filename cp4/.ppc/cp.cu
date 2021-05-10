@@ -16,14 +16,15 @@ __global__ void mykernel(float* result, const float* data, int nx, int ny) {
     if (i >= n || j >= n)
         return;
     float size = nx;
+    float sumI = 0;
+    float sumJ = 0;
+    float sumJI = 0;
+    float squareSumI = 0;
+    float squareSumJ = 0;    
+
 
     for(i=i; i < ny; i++){
         for (j=i; j<ny; j++){
-            float sumI = 0;
-            float sumJ = 0;
-            float sumJI = 0;
-            float squareSumI = 0;
-            float squareSumJ = 0;    
     
             for (int x = 0; x < nx; x++){
                 sumI += data[x+i*nx];
@@ -35,6 +36,12 @@ __global__ void mykernel(float* result, const float* data, int nx, int ny) {
         }
         result[i + j*ny] = (size * sumJI - sumJ * sumI) 
         / sqrt((size * squareSumJ - sumJ * sumJ) * (size * squareSumI - sumI * sumI));
+        sumI =0;
+        sumJ = 0;
+        sumJI = 0;
+        squareSumI = 0;
+        squareSumJ = 0;
+
     }
 }
 
