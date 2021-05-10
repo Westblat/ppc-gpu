@@ -17,10 +17,10 @@ using namespace std;
 __global__ void mykernel(float* result, const float* data, int nx, int ny) {
     int i = threadIdx.x + blockIdx.x * blockDim.x;
     int j = threadIdx.y + blockIdx.y * blockDim.y;
-    if (i >= ny || j >= ny)
+    if (i >= ny || j >= ny || j > i)
         return;
     float size = nx;
-    printf("%d j %d i", j, i);
+    //printf("%d j %d i", j, i);
 
     float sumI = 0;
     float sumJ = 0;
@@ -35,8 +35,7 @@ __global__ void mykernel(float* result, const float* data, int nx, int ny) {
         squareSumJ += data[x+j*nx] * data[x+j*nx];
     }
     float shit = sqrt((size * squareSumJ - sumJ * sumJ) * (size * squareSumI - sumI * sumI));
-    float asd = (size * sumJI - sumJ * sumI) 
-    / shit;
+    float asd = (size * sumJI - sumJ * sumI) / shit;
     result[i + j*ny] = asd;
 
 
