@@ -22,6 +22,24 @@ __global__ void mykernel(float* result, const float* data, int nx, int ny) {
     float size = nx;
     printf("%d j %d i", j, i);
 
+    float sumI = 0;
+    float sumJ = 0;
+    float sumJI = 0;
+    float squareSumI = 0;
+    float squareSumJ = 0;    
+    for (int x = 0; x < nx; x++){
+        sumI += data[x+i*nx];
+        sumJ += data[x+j*nx];
+        sumJI += data[x+i*nx] * data[x+j*nx];
+        squareSumI += data[x+i*nx] * data[x+i*nx];
+        squareSumJ += data[x+j*nx] * data[x+j*nx];
+    }
+    float asd = (size * sumJI - sumJ * sumI) 
+    / sqrt((size * squareSumJ - sumJ * sumJ) * (size * squareSumI - sumI * sumI));
+    result[i + j*ny] = asd;
+
+
+
     /*for(j=0; j < ny; j++){
         //printf("%d j", j);
         for (i=j; i<ny; i++){
