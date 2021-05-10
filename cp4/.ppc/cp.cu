@@ -21,9 +21,9 @@ __global__ void mykernel(float* result, const float* data, int nx, int ny) {
 
 
     for(j=0; j < ny; j++){
-        cout << j << " j" << endl;
+        printf("%d j", j);
         for (i=j; i<ny; i++){
-            cout << i << " i" << endl;
+            printf("%d i", i);
             float sumI = 0;
             float sumJ = 0;
             float sumJI = 0;
