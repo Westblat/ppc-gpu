@@ -18,9 +18,6 @@ __global__ void mykernel(float* result, const float* data, int nx, int ny) {
     int i = threadIdx.x + blockIdx.x * blockDim.x;
     int j = threadIdx.y + blockIdx.y * blockDim.y;
     if (i >= ny || j >= ny || j > i)
-    if(j > i){
-        result[i + j*ny] = 0;
-    }    
     return;
     float size = nx;
     //printf("%d j %d i", j, i);
