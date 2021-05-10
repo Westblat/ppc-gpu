@@ -36,9 +36,10 @@ __global__ void mykernel(float* result, const float* data, int nx, int ny) {
                 squareSumI += data[x+i*nx] * data[x+i*nx];
                 squareSumJ += data[x+j*nx] * data[x+j*nx];
             }
-            result[i + j*ny] = (size * sumJI - sumJ * sumI) 
+            float asd = (size * sumJI - sumJ * sumI) 
             / (float)sqrt((size * squareSumJ - sumJ * sumJ) * (size * squareSumI - sumI * sumI));
-            printf("%d result", result[i + j*ny]);
+            result[i + j*ny] = asd
+            printf("%f result", asd);
         }
     }
 }
