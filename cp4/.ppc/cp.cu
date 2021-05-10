@@ -23,7 +23,7 @@ __global__ void mykernel(float* result, const float* data, int nx, int ny) {
     for(j=0; j < ny; j++){
         printf("%d j", j);
         for (i=j; i<ny; i++){
-            printf("%d i", i);
+            printf("%d i", i + j*ny);
             float sumI = 0;
             float sumJ = 0;
             float sumJI = 0;
@@ -37,7 +37,7 @@ __global__ void mykernel(float* result, const float* data, int nx, int ny) {
                 squareSumJ += data[x+j*nx] * data[x+j*nx];
             }
             result[i + j*ny] = (size * sumJI - sumJ * sumI) 
-            / sqrt((size * squareSumJ - sumJ * sumJ) * (size * squareSumI - sumI * sumI));
+            / (float)sqrt((size * squareSumJ - sumJ * sumJ) * (size * squareSumI - sumI * sumI));
         }
     }
 }
