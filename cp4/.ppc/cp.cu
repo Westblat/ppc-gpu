@@ -6,7 +6,7 @@ This is the function you need to implement. Quick reference:
 - correlation between rows i and row j has to be stored in result[i + j*ny]
 - only parts with 0 <= j <= i < ny need to be filled
 */
-#include <cstdlib>
+//#include <cstdlib>
 #include <iostream>
 #include <cuda_runtime.h>
 #include <math.h>
@@ -34,8 +34,9 @@ __global__ void mykernel(float* result, const float* data, int nx, int ny) {
         squareSumI += data[x+i*nx] * data[x+i*nx];
         squareSumJ += data[x+j*nx] * data[x+j*nx];
     }
+    float shit = sqrt((size * squareSumJ - sumJ * sumJ) * (size * squareSumI - sumI * sumI));
     float asd = (size * sumJI - sumJ * sumI) 
-    / sqrt((size * squareSumJ - sumJ * sumJ) * (size * squareSumI - sumI * sumI));
+    / shit;
     result[i + j*ny] = asd;
 
 
