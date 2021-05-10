@@ -66,8 +66,8 @@ void correlate(int ny, int nx, const float *data, float *result) {
     float* dGPU = NULL;
     CHECK(cudaMalloc((void**)&dGPU, ny * nx * sizeof(float)));
     float* rGPU = NULL;
-    CHECK(cudaMalloc((void**)&rGPU, ny * nx * sizeof(float)));
-    CHECK(cudaMemcpy(dGPU, data, ny * ny * sizeof(float), cudaMemcpyHostToDevice));
+    CHECK(cudaMalloc((void**)&rGPU, ny * ny * sizeof(float)));
+    CHECK(cudaMemcpy(dGPU, data, ny * nx * sizeof(float), cudaMemcpyHostToDevice));
 
     // Run kernel
     dim3 dimBlock(1, 1);
