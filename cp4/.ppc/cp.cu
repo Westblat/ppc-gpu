@@ -18,7 +18,8 @@ __global__ void mykernel(float* result, const float* data, int nx, int ny) {
     int i = threadIdx.x + blockIdx.x * blockDim.x;
     int j = threadIdx.y + blockIdx.y * blockDim.y;
     if (i >= ny || j >= ny || j > i)
-        return;
+    result[i + j*ny] = 0;    
+    return;
     float size = nx;
     //printf("%d j %d i", j, i);
 
@@ -37,31 +38,6 @@ __global__ void mykernel(float* result, const float* data, int nx, int ny) {
     double shit = (double)sqrt((size * squareSumJ - sumJ * sumJ) * (size * squareSumI - sumI * sumI));
     double asd = (double)(size * sumJI - sumJ * sumI) / shit;
     result[i + j*ny] = (float)asd;
-
-
-
-    /*for(j=0; j < ny; j++){
-        //printf("%d j", j);
-        for (i=j; i<ny; i++){
-            //printf("%d i", i + j*ny);
-            float sumI = 0;
-            float sumJ = 0;
-            float sumJI = 0;
-            float squareSumI = 0;
-            float squareSumJ = 0;    
-            for (int x = 0; x < nx; x++){
-                sumI += data[x+i*nx];
-                sumJ += data[x+j*nx];
-                sumJI += data[x+i*nx] * data[x+j*nx];
-                squareSumI += data[x+i*nx] * data[x+i*nx];
-                squareSumJ += data[x+j*nx] * data[x+j*nx];
-            }
-            float asd = (size * sumJI - sumJ * sumI) 
-            / sqrt((size * squareSumJ - sumJ * sumJ) * (size * squareSumI - sumI * sumI));
-            result[i + j*ny] = asd;
-            printf("%f result %d %d;", asd, j, i);
-        }
-    }*/
 }
 
 
