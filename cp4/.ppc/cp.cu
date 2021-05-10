@@ -13,7 +13,7 @@ This is the function you need to implement. Quick reference:
 __global__ void mykernel(float* result, const float* data, int nx, int ny) {
     int i = threadIdx.x + blockIdx.x * blockDim.x;
     int j = threadIdx.y + blockIdx.y * blockDim.y;
-    if (i >= n || j >= n)
+    if (i >= ny || j >= ny)
         return;
     float size = nx;
 
