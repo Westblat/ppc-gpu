@@ -67,7 +67,7 @@ void correlate(int ny, int nx, const float *data, float *result) {
     CHECK(cudaMalloc((void**)&dGPU, ny * nx * sizeof(float)));
     float* rGPU = NULL;
     CHECK(cudaMalloc((void**)&rGPU, ny * nx * sizeof(float)));
-    CHECK(cudaMemcpy(dGPU, data, ny * nx * sizeof(float), cudaMemcpyHostToDevice));
+    CHECK(cudaMemcpy(dGPU, data, ny * ny * sizeof(float), cudaMemcpyHostToDevice));
 
     // Run kernel
     dim3 dimBlock(1, 1);
@@ -76,7 +76,7 @@ void correlate(int ny, int nx, const float *data, float *result) {
     CHECK(cudaGetLastError());
 
     // Copy data back to CPU & release memory
-    CHECK(cudaMemcpy(result, rGPU, nx * ny * sizeof(float), cudaMemcpyDeviceToHost));
+    CHECK(cudaMemcpy(result, rGPU, ny * ny * sizeof(float), cudaMemcpyDeviceToHost));
     CHECK(cudaFree(dGPU));
     CHECK(cudaFree(rGPU));
     
