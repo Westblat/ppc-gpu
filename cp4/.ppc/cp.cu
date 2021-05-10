@@ -21,9 +21,9 @@ __global__ void mykernel(float* result, const float* data, int nx, int ny) {
 
 
     for(j=0; j < ny; j++){
-        printf("%d j", j);
+        //printf("%d j", j);
         for (i=j; i<ny; i++){
-            printf("%d i", i + j*ny);
+            //printf("%d i", i + j*ny);
             float sumI = 0;
             float sumJ = 0;
             float sumJI = 0;
@@ -39,7 +39,7 @@ __global__ void mykernel(float* result, const float* data, int nx, int ny) {
             float asd = (size * sumJI - sumJ * sumI) 
             / (float)sqrt((size * squareSumJ - sumJ * sumJ) * (size * squareSumI - sumI * sumI));
             result[i + j*ny] = asd;
-            printf("%f result", asd);
+            printf("%f result %d %d;", asd, j, i);
         }
     }
 }
