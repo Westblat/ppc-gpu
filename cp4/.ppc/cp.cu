@@ -9,7 +9,7 @@ This is the function you need to implement. Quick reference:
 #include <cstdlib>
 #include <iostream>
 #include <cuda_runtime.h>
-#include <cmath>
+#include <math.h>
 
 using namespace std;
 
