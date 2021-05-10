@@ -18,8 +18,8 @@ __global__ void mykernel(float* result, const float* data, int nx, int ny) {
     float size = nx;
 
 
-    for(i=i; i < ny; i++){
-        for (j=i; j<ny; j++){   
+    for(j=0; j < ny; j++){
+        for (i=j; i<ny; i++){   
             float sumI = 0;
             float sumJ = 0;
             float sumJI = 0;
