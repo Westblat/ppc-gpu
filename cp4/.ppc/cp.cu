@@ -9,6 +9,8 @@ This is the function you need to implement. Quick reference:
 #include <cstdlib>
 #include <iostream>
 #include <cuda_runtime.h>
+#include <cmath>
+
 using namespace std;
 
 
@@ -18,9 +20,9 @@ __global__ void mykernel(float* result, const float* data, int nx, int ny) {
     if (i >= ny || j >= ny)
         return;
     float size = nx;
+    printf("%d j %d i", j, i);
 
-
-    for(j=0; j < ny; j++){
+    /*for(j=0; j < ny; j++){
         //printf("%d j", j);
         for (i=j; i<ny; i++){
             //printf("%d i", i + j*ny);
@@ -37,11 +39,11 @@ __global__ void mykernel(float* result, const float* data, int nx, int ny) {
                 squareSumJ += data[x+j*nx] * data[x+j*nx];
             }
             float asd = (size * sumJI - sumJ * sumI) 
-            / (float)sqrt((size * squareSumJ - sumJ * sumJ) * (size * squareSumI - sumI * sumI));
+            / sqrt((size * squareSumJ - sumJ * sumJ) * (size * squareSumI - sumI * sumI));
             result[i + j*ny] = asd;
             printf("%f result %d %d;", asd, j, i);
         }
-    }
+    }*/
 }
 
 
@@ -70,7 +72,7 @@ void correlate(int ny, int nx, const float *data, float *result) {
     CHECK(cudaMemcpy(dGPU, data, ny * nx * sizeof(float), cudaMemcpyHostToDevice));
 
     // Run kernel
-    dim3 dimBlock(1, 1);
+    dim3 dimBlock(16, 16);
     dim3 dimGrid(divup(ny, dimBlock.x), divup(ny, dimBlock.y));
     mykernel<<<dimGrid, dimBlock>>>(rGPU, dGPU, nx, ny);
     CHECK(cudaGetLastError());
