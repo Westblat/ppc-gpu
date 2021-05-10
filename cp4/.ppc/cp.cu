@@ -25,7 +25,6 @@ __global__ void mykernel(float* result, const float* data, int nx, int ny) {
             float sumJI = 0;
             float squareSumI = 0;
             float squareSumJ = 0;    
-         
             for (int x = 0; x < nx; x++){
                 sumI += data[x+i*nx];
                 sumJ += data[x+j*nx];
@@ -65,7 +64,7 @@ void correlate(int ny, int nx, const float *data, float *result) {
 
     // Run kernel
     dim3 dimBlock(16, 16);
-    dim3 dimGrid(divup(nx, dimBlock.x), divup(ny, dimBlock.y));
+    dim3 dimGrid(divup(ny, dimBlock.x), divup(ny, dimBlock.y));
     mykernel<<<dimGrid, dimBlock>>>(rGPU, dGPU, nx, ny);
     CHECK(cudaGetLastError());
 
