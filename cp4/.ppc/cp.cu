@@ -9,6 +9,8 @@ This is the function you need to implement. Quick reference:
 #include <cstdlib>
 #include <iostream>
 #include <cuda_runtime.h>
+using namespace std;
+
 
 __global__ void mykernel(float* result, const float* data, int nx, int ny) {
     int i = threadIdx.x + blockIdx.x * blockDim.x;
@@ -19,7 +21,9 @@ __global__ void mykernel(float* result, const float* data, int nx, int ny) {
 
 
     for(j=0; j < ny; j++){
-        for (i=j; i<ny; i++){   
+        cout << j << " j" << endl;
+        for (i=j; i<ny; i++){
+            cout << i << " i" << endl;
             float sumI = 0;
             float sumJ = 0;
             float sumJI = 0;
@@ -46,6 +50,8 @@ static inline void check(cudaError_t err, const char* context) {
         std::exit(EXIT_FAILURE);
     }
 }
+#define CHECK(x) check(x, #x)
+
 static inline int divup(int a, int b) {
     return (a + b - 1)/b;
 }
@@ -54,7 +60,6 @@ static inline int roundup(int a, int b) {
     return divup(a, b) * b;
 }
 
-#define CHECK(x) check(x, #x)
 void correlate(int ny, int nx, const float *data, float *result) {
     float* dGPU = NULL;
     CHECK(cudaMalloc((void**)&dGPU, ny * nx * sizeof(float)));
@@ -63,7 +68,7 @@ void correlate(int ny, int nx, const float *data, float *result) {
     CHECK(cudaMemcpy(dGPU, data, ny * nx * sizeof(float), cudaMemcpyHostToDevice));
 
     // Run kernel
-    dim3 dimBlock(16, 16);
+    dim3 dimBlock(1, 1);
     dim3 dimGrid(divup(ny, dimBlock.x), divup(ny, dimBlock.y));
     mykernel<<<dimGrid, dimBlock>>>(rGPU, dGPU, nx, ny);
     CHECK(cudaGetLastError());
