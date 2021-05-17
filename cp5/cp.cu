@@ -72,6 +72,7 @@ void correlate(int ny, int nx, const float *data, float *result) {
 
     float *averageList = new float[ny];
     float *newData = new float[nx*ny];
+    float *newNewData = new float[nx*ny];
     float *squareSums = new float[ny];
 
     for(int i = 0; i < ny; i++){
@@ -111,8 +112,8 @@ void correlate(int ny, int nx, const float *data, float *result) {
     myppkernel<<<dimGrid, dimBlock>>>(rGPU, dOtherGPU, newData, nx, ny);
     CHECK(cudaGetLastError());
 }   
-CHECK(cudaMemcpy(newData, r2GPU, nx * ny * sizeof(float), cudaMemcpyDeviceToHost));
-CHECK(cudaMemcpy(dGPU, newData, ny * nx * sizeof(float), cudaMemcpyHostToDevice));
+CHECK(cudaMemcpy(newNewData, r2GPU, nx * ny * sizeof(float), cudaMemcpyDeviceToHost));
+CHECK(cudaMemcpy(dGPU, newNewData, ny * nx * sizeof(float), cudaMemcpyHostToDevice));
 
 
     // Run kernel
