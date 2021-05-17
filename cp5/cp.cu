@@ -22,7 +22,15 @@ __global__ void mykernel(float* result, const float* data, int nx, int ny) {
     float size = nx;
     //printf("%d j %d i", j, i);
 
-    double sumI = 0;
+    for(int y = i; y < ny; y++){
+        double newValue = 0;
+        for(int j = 0; j < nx; j++){
+            newValue += data[j + i*nx] * data[j + y*nx];
+        }
+        result[y + i*ny] = newValue;
+    }
+
+    /*double sumI = 0;
     double sumJ = 0;
     double sumJI = 0;
     double squareSumI = 0;
@@ -36,7 +44,7 @@ __global__ void mykernel(float* result, const float* data, int nx, int ny) {
     }
     double shit = (double)sqrt((size * squareSumJ - sumJ * sumJ) * (size * squareSumI - sumI * sumI));
     double asd = (double)(size * sumJI - sumJ * sumI) / shit;
-    result[i + j*ny] = (float)asd;
+    result[i + j*ny] = (float)asd;*/
 }
 
 
@@ -62,8 +70,40 @@ void correlate(int ny, int nx, const float *data, float *result) {
     CHECK(cudaMalloc((void**)&dGPU, ny * nx * sizeof(float)));
     float* rGPU = NULL;
     CHECK(cudaMalloc((void**)&rGPU, ny * ny * sizeof(float)));
+    vector<double> averageList(ny, 0);
+    vector<double> newData(nx*ny, 0);
+    vector<double> squareSums(ny, 0);
+
+    for(int i = 0; i < ny; i++){
+        double average = 0;
+        for(int j = 0; j < nx; j++){
+            average += (double)data[j + i*nx];
+        }
+        average = average / (double)nx;
+        averageList[i] = average;
+    }
+
+    for(int i = 0; i < ny; i++){
+        double rowSquareSum = 0;
+        for(int j = 0; j < nx; j++){
+            double newValue = (double)data[j + i*nx] - averageList[i];
+            newData[j + i*nx] = newValue;
+            double square = newValue * newValue;
+            rowSquareSum += square;
+        }
+        squareSums[i] = rowSquareSum;
+    }
+
+    for(int i = 0; i < ny; i++){
+        for(int j = 0; j < nx; j++){
+            double square = sqrt(squareSums[i]);
+            double newValue = newData[j + i*nx] / square;
+            newData[j + i*nx] = newValue;
+        }
+    }
+
     CHECK(cudaMemset(rGPU, 0, ny * ny * sizeof(float)));
-    CHECK(cudaMemcpy(dGPU, data, ny * nx * sizeof(float), cudaMemcpyHostToDevice));
+    CHECK(cudaMemcpy(dGPU, newData, ny * nx * sizeof(float), cudaMemcpyHostToDevice));
 
     // Run kernel
     dim3 dimBlock(16, 16);
