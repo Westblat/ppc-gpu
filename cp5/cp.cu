@@ -32,7 +32,7 @@ __global__ void mykernel(float* result, const float* data, int nx, int ny) {
     printf("%f ", newValue);
 
 }
-__global__ void myppkernel(float* result, const float* data, int nx, int ny) {
+__global__ void myppkernel(float* result, float* data, int nx, int ny) {
     int i = threadIdx.x;
     int j = threadIdx.y;
     float *averageList = new float[ny];
