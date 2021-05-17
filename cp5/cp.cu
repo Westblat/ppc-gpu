@@ -43,9 +43,9 @@ __global__ void myppkernel(float* result, float* data, float* processedData, int
     float average = 0;
     for(int x = 0; x < nn; x+=64){
         int j = ja + x;
-        average += (float)data[j + i*nx];
+        average += (float)data[j + i*nn];
     }
-    average = average / (float)nx;
+    average = average / (float)nn;
     averageList[i] = average;
 
     __syncthreads();
@@ -53,20 +53,21 @@ __global__ void myppkernel(float* result, float* data, float* processedData, int
     float rowSquareSum = 0;
     for(int x = 0; x < nn; x+=64){
         int j = ja + x;
-        float newValue = (float)data[j + i*nx] - averageList[i];
-        processedData[j + i*nx] = newValue;
+        float newValue = (float)data[j + i*nn] - averageList[i];
+        processedData[j + i*nn] = newValue;
         float square = newValue * newValue;
         rowSquareSum += square;
     }
     squareSums[i] = rowSquareSum;
 
     __syncthreads();
-
+    float* t = processedData + nn * nn;
     for(int x = 0; x < nn; x+=64){
         int j = ja + x;
         float square = (float)sqrt(squareSums[i]);
-        float newValue = (float)processedData[j + i*nx] / square;
-        processedData[j + i*nx] = newValue;
+        float newValue = (float)processedData[j + i*nn] / square;
+        processedData[j + i*nn] = newValue;
+        t[i + j*nn] = newValue;
     }
 
     __syncthreads();
@@ -115,8 +116,9 @@ void correlate(int ny, int nx, const float *data, float *result) {
     }
     // Run kernel
     {
-    dim3 dimBlock(16, 16);
+    dim3 dimBlock(8, 8);
     dim3 dimGrid(divup(ny, dimBlock.x), divup(ny, dimBlock.y));
+    //dim3 dimGrid( nn / 64, nn / 64);
     mykernel<<<dimGrid, dimBlock>>>(rGPU, dProcessedGPU, nx, ny);
     CHECK(cudaGetLastError());
     }
