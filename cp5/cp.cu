@@ -63,7 +63,7 @@ __global__ void myppkernel(float* result, float* data, int nx, int ny) {
     for(int x = 0; x < nx; x++){
         float square = (float)sqrt(squareSums[i]);
         float newValue = (float)newData[x + i*nx] / square;
-        printf"(%f ", data[x + i*nx]);
+        printf("%f ", data[x + i*nx]);
         data[x + i*nx] = newValue;
     }
 
