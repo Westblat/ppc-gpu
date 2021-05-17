@@ -22,7 +22,6 @@ __global__ void mykernel(float* result, const float* data, int nx, int ny) {
     printf("Hello");
     if (i >= ny || j >= ny || j > i)
     return;
-    float size = nx;
     //printf("%d i %d j ", i, j);
     double newValue = 0;
     for(int x = 0; x < nx; x++){
@@ -67,7 +66,7 @@ __global__ void myppkernel(float* result, float* data, float* processedData, int
         int j = ja + x;
         float square = (float)sqrt(squareSums[i]);
         float newValue = (float)processedData[j + i*nx] / square;
-        data[j + i*nx] = newValue;
+        processedData[j + i*nx] = newValue;
     }
 
     __syncthreads();
