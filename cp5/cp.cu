@@ -10,6 +10,8 @@ This is the function you need to implement. Quick reference:
 #include <iostream>
 #include <cuda_runtime.h>
 #include <math.h>
+#include <cmath>
+#include <bits/stdc++.h>
 
 using namespace std;
 
