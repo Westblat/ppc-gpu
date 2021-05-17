@@ -23,14 +23,10 @@ __global__ void mykernel(float* result, const float* data, int nx, int ny) {
     return;
     float size = nx;
     //printf("%d j %d i", j, i);
-
-    for(int y = i; y < ny; y++){
-        double newValue = 0;
-        for(int j = 0; j < nx; j++){
-            newValue += data[j + i*nx] * data[j + y*nx];
-        }
-        result[y + i*ny] = newValue;
+    for(int j = 0; j < nx; j++){
+        newValue += data[j + i*nx] * data[j + y*nx];
     }
+    result[y + i*ny] = newValue;
 
     /*double sumI = 0;
     double sumJ = 0;
