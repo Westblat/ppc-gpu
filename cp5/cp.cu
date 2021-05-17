@@ -64,7 +64,7 @@ __global__ void myppkernel(float* result, const float* data, int nx, int ny) {
     for(int x = 0; x < nx; x++){
         float square = (float)sqrt(squareSums[i]);
         float newValue = newData[x + i*nx] / square;
-        result[x + i*nx] = (float)newValue;
+        data[x + i*nx] = (float)newValue;
     }
 
     __syncthreads();
