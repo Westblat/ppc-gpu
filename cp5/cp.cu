@@ -63,7 +63,7 @@ void correlate(int ny, int nx, const float *data, float *result) {
     CHECK(cudaMalloc((void**)&rGPU, ny * ny * sizeof(float)));
     float *averageList = new float[ny];
     float *newData = new float[nx*ny];
-    float *newData = squareSums[ny];
+    float *squareSums = squareSums[ny];
 
     for(int i = 0; i < ny; i++){
         float average = 0;
