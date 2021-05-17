@@ -132,7 +132,7 @@ void correlate(int ny, int nx, const float *data, float *result) {
 
     {
         dim3 dimBlock(64, 1);
-        dim3 dimGrid(1, nn);
+        dim3 dimGrid(1, nx);
         myppkernel<<<dimGrid, dimBlock>>>(rGPU, dGPU, nx, ny);
         CHECK(cudaGetLastError());
     }
@@ -147,5 +147,5 @@ void correlate(int ny, int nx, const float *data, float *result) {
     CHECK(cudaMemcpy(result, rGPU, ny * ny * sizeof(float), cudaMemcpyDeviceToHost));
     CHECK(cudaFree(dGPU));
     CHECK(cudaFree(rGPU));
-    delete[] newData;
+    //delete[] newData;
 }
