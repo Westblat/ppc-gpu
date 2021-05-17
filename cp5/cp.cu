@@ -142,7 +142,7 @@ void correlate(int ny, int nx, const float *data, float *result) {
 
     {
         dim3 dimBlock(64, 1);
-        dim3 dimGrid(1, 64);
+        dim3 dimGrid(1, nn);
         myppkernel<<<dimGrid, dimBlock>>>(rGPU, dGPU, dProcessedGPU, nx, ny, nn);
         CHECK(cudaGetLastError());
     }
@@ -156,6 +156,7 @@ void correlate(int ny, int nx, const float *data, float *result) {
     // Copy data back to CPU & release memory
     //CHECK(cudaMemcpy(result, rGPU, ny * ny * sizeof(float), cudaMemcpyDeviceToHost));
     CHECK(cudaFree(dGPU));
+    CHECK(cudaFree(dProcessedGPU));
     CHECK(cudaFree(rGPU));
     //delete[] newData;
 }
