@@ -40,8 +40,6 @@ __global__ void myppkernel(float* result, float* data, int nx, int ny) {
     float *newData = new float[nx*ny];
     float *squareSums = new float[ny];
 
-
-
     float average = 0;
     for(int x = 0; x < nx; x++){
         average += (float)data[x + i*nx];
@@ -65,11 +63,12 @@ __global__ void myppkernel(float* result, float* data, int nx, int ny) {
     for(int x = 0; x < nx; x++){
         float square = (float)sqrt(squareSums[i]);
         float newValue = (float)newData[x + i*nx] / square;
+        printf"(%f ", data[x + i*nx])
         data[x + i*nx] = newValue;
     }
 
     __syncthreads();
-    printf("Moi");
+    
 
     delete[] newData;
     delete[] averageList;
