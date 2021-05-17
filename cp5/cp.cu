@@ -30,13 +30,46 @@ __global__ void mykernel(float* result, const float* data, int nx, int ny) {
     }
     result[i + j*ny] = newValue;
 }
-__global__ void myppkernel(float* result, const float* data, const float* otherData, int nx, int ny) {
+__global__ void myppkernel(float* result, const float* data, int nx, int ny) {
     int i = threadIdx.x;
     int j = threadIdx.y;
-    float square = (float)sqrt(data[i]);
-    float newValue = otherData[j + i*nx] / square;
-    result[j + i*nx] = (float)newValue;
+    float *averageList = new float[ny];
+    float *newData = new float[nx*ny];
+    float *squareSums = new float[ny];
 
+
+
+    float average = 0;
+    for(int x = 0; x < nx; x++){
+        average += (float)data[x + i*nx];
+    }
+    average = average / (float)nx;
+    averageList[i] = average;
+
+    __syncthreads();
+
+    float rowSquareSum = 0;
+    for(int x = 0; x < nx; x++){
+        float newValue = (float)data[x + i*nx] - averageList[i];
+        newData[x + i*nx] = newValue;
+        float square = newValue * newValue;
+        rowSquareSum += square;
+    }
+    squareSums[i] = rowSquareSum;
+
+    __syncthreads();
+
+    for(int x = 0; x < nx; x++){
+        float square = (float)sqrt(squareSums[i]);
+        float newValue = newData[x + i*nx] / square;
+        result[x + i*nx] = (float)newValue;
+    }
+
+    __syncthreads();
+
+    delete[] newData;
+    delete[] averageList;
+    delete[] squareSums;
 }
 
 static inline void check(cudaError_t err, const char* context) {
@@ -59,21 +92,11 @@ static inline int roundup(int a, int b) {
 void correlate(int ny, int nx, const float *data, float *result) {
     float* dGPU = NULL;
     CHECK(cudaMalloc((void**)&dGPU, ny * nx * sizeof(float)));
-    float* dOtherGPU = NULL;
-    CHECK(cudaMalloc((void**)&dOtherGPU, ny * nx * sizeof(float)));
-    float* dThirdGPU = NULL;
-    CHECK(cudaMalloc((void**)&dThirdGPU, ny * nx * sizeof(float)));
-
-
     float* rGPU = NULL;
     CHECK(cudaMalloc((void**)&rGPU, ny * ny * sizeof(float)));
-    float* r2GPU = NULL;
-    CHECK(cudaMalloc((void**)&r2GPU, ny * ny * sizeof(float)));
-
-    float *averageList = new float[ny];
+    /*float *averageList = new float[ny];
     float *newData = new float[nx*ny];
-    float *newNewData = new float[nx*ny];
-    float *squareSums = new float[ny];
+    vector<float> squareSums(ny, 0);
 
     for(int i = 0; i < ny; i++){
         float average = 0;
@@ -81,7 +104,8 @@ void correlate(int ny, int nx, const float *data, float *result) {
             average += (float)data[j + i*nx];
         }
         average = average / (float)nx;
-        averageList[i] = average;    
+        averageList[i] = average;
+    
     }
 
     for(int i = 0; i < ny; i++){
@@ -95,27 +119,23 @@ void correlate(int ny, int nx, const float *data, float *result) {
         squareSums[i] = rowSquareSum;
     }
 
-    /*for(int i = 0; i < ny; i++){
+    for(int i = 0; i < ny; i++){
         for(int j = 0; j < nx; j++){
+            float square = (float)sqrt(squareSums[i]);
+            float newValue = newData[j + i*nx] / square;
+            newData[j + i*nx] = (float)newValue;
         }
     }*/
 	
     CHECK(cudaMemset(rGPU, 0, ny * ny * sizeof(float)));
-    CHECK(cudaMemset(r2GPU, 0, nx * ny * sizeof(float)));
-    CHECK(cudaMemset(dOtherGPU, 0, ny * sizeof(float)));
-    CHECK(cudaMemset(dThirdGPU, 0, nx * ny * sizeof(float)));
+    CHECK(cudaMemcpy(dGPU, data, ny * nx * sizeof(float), cudaMemcpyHostToDevice));  
 
-        // Run kernel
-{       
-    dim3 dimBlock(16, 16);
-    dim3 dimGrid(divup(ny, dimBlock.x), divup(ny, dimBlock.y));
-    myppkernel<<<dimGrid, dimBlock>>>(rGPU, dOtherGPU, newData, nx, ny);
-    CHECK(cudaGetLastError());
-}   
-CHECK(cudaMemcpy(newNewData, r2GPU, nx * ny * sizeof(float), cudaMemcpyDeviceToHost));
-CHECK(cudaMemcpy(dGPU, newNewData, ny * nx * sizeof(float), cudaMemcpyHostToDevice));
-
-
+    {
+        dim3 dimBlock(64, 1);
+        dim3 dimGrid(1, nn);
+        myppkernel<<<dimGrid, dimBlock>>>(rGPU, dGPU, n, nn);
+        CHECK(cudaGetLastError());
+    }
     // Run kernel
     {
     dim3 dimBlock(16, 16);
@@ -127,9 +147,5 @@ CHECK(cudaMemcpy(dGPU, newNewData, ny * nx * sizeof(float), cudaMemcpyHostToDevi
     CHECK(cudaMemcpy(result, rGPU, ny * ny * sizeof(float), cudaMemcpyDeviceToHost));
     CHECK(cudaFree(dGPU));
     CHECK(cudaFree(rGPU));
-    CHECK(cudaFree(dThirdGPU));
-    CHECK(cudaFree(r2GPU));
-    CHECK(cudaFree(dOtherGPU));
-
     delete[] newData;
 }
