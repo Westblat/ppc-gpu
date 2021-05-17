@@ -22,7 +22,7 @@ __global__ void mykernel(float* result, const float* data, int nx, int ny) {
     if (i >= ny || j >= ny || j > i)
     return;
     float size = nx;
-    printf("%d i %d j ", i, j);
+    //printf("%d i %d j ", i, j);
     double newValue = 0;
     for(int x = 0; x < nx; x++){
         //printf("%d i %d j ", data[x + i*nx], data[x + j*nx]);
