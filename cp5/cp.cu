@@ -29,6 +29,8 @@ __global__ void mykernel(float* result, const float* data, int nx, int ny) {
         newValue += data[x + i*nx] * data[x + j*nx];
     }
     result[i + j*ny] = newValue;
+    printf(newValue);
+
 }
 __global__ void myppkernel(float* result, const float* data, int nx, int ny) {
     int i = threadIdx.x;
