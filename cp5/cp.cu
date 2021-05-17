@@ -29,7 +29,7 @@ __global__ void mykernel(float* result, const float* data, int nx, int ny) {
 
         newValue += data[x + i*nx] * data[x + j*nx];
     }
-    result[j + i*ny] = newValue;
+    result[i + j*ny] = newValue;
 }
 
 
