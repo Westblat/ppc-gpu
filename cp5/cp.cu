@@ -59,8 +59,17 @@ static inline int roundup(int a, int b) {
 void correlate(int ny, int nx, const float *data, float *result) {
     float* dGPU = NULL;
     CHECK(cudaMalloc((void**)&dGPU, ny * nx * sizeof(float)));
+    float* dOtherGPU = NULL;
+    CHECK(cudaMalloc((void**)&dOtherGPU, ny * nx * sizeof(float)));
+    float* dThirdGPU = NULL;
+    CHECK(cudaMalloc((void**)&dThirdGPU, ny * nx * sizeof(float)));
+
+
     float* rGPU = NULL;
     CHECK(cudaMalloc((void**)&rGPU, ny * ny * sizeof(float)));
+    float* r2GPU = NULL;
+    CHECK(cudaMalloc((void**)&r2GPU, ny * ny * sizeof(float)));
+
     float *averageList = new float[ny];
     float *newData = new float[nx*ny];
     float *squareSums = new float[ny];
@@ -117,5 +126,9 @@ CHECK(cudaMemcpy(dGPU, newData, ny * nx * sizeof(float), cudaMemcpyHostToDevice)
     CHECK(cudaMemcpy(result, rGPU, ny * ny * sizeof(float), cudaMemcpyDeviceToHost));
     CHECK(cudaFree(dGPU));
     CHECK(cudaFree(rGPU));
+    CHECK(cudaFree(dThirdGPU));
+    CHECK(cudaFree(r2GPU));
+    CHECK(cudaFree(dOtherGPU));
+
     delete[] newData;
 }
