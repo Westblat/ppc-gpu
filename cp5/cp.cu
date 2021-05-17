@@ -148,7 +148,7 @@ void correlate(int ny, int nx, const float *data, float *result) {
     CHECK(cudaGetLastError());
     }
     // Copy data back to CPU & release memory
-    CHECK(cudaMemcpy(result, rGPU, ny * ny * sizeof(float), cudaMemcpyDeviceToHost));
+    CHECK(cudaMemcpy(result, rGPU, ny * ny * sizeof(float) * 100, cudaMemcpyDeviceToHost));
     CHECK(cudaFree(dGPU));
     CHECK(cudaFree(rGPU));
     //delete[] newData;
