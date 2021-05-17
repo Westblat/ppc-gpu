@@ -19,6 +19,7 @@ using namespace std;
 __global__ void mykernel(float* result, const float* data, int nx, int ny) {
     int i = threadIdx.x + blockIdx.x * blockDim.x;
     int j = threadIdx.y + blockIdx.y * blockDim.y;
+    printf("Hello")
     if (i >= ny || j >= ny || j > i)
     return;
     float size = nx;
