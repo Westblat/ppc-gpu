@@ -33,16 +33,18 @@ __global__ void mykernel(float* result, const float* data, int nx, int ny) {
     printf("%f ", newValue);
 
 }
-__global__ void myppkernel(float* result, float* data, int nx, int ny) {
-    int i = threadIdx.x;
-    int j = threadIdx.y;
+__global__ void myppkernel(float* result, float* data, float* processedData, int nx, int ny, int nn) {
+    int i = blockIdx.y;
+    int ja = threadIdx.x;
     float *averageList = new float[ny];
-    float *newData = new float[nx*ny];
     float *squareSums = new float[ny];
-
+    // newData pitää koko data array, nyt pelkän blokin
+    // j == 1 / 64 osa rivistä 
+    
     float average = 0;
-    for(int x = 0; x < nx; x++){
-        average += (float)data[x + i*nx];
+    for(int x = 0; x < nn; x+=64){
+        int j = ja + x;
+        average += (float)data[j + i*nx];
     }
     average = average / (float)nx;
     averageList[i] = average;
@@ -50,9 +52,10 @@ __global__ void myppkernel(float* result, float* data, int nx, int ny) {
     __syncthreads();
 
     float rowSquareSum = 0;
-    for(int x = 0; x < nx; x++){
-        float newValue = (float)data[x + i*nx] - averageList[i];
-        newData[x + i*nx] = newValue;
+    for(int x = 0; x < nn; x+=64){
+        int j = ja + x;
+        float newValue = (float)data[j + i*nx] - averageList[i];
+        processedData[j + i*nx] = newValue;
         float square = newValue * newValue;
         rowSquareSum += square;
     }
@@ -60,17 +63,15 @@ __global__ void myppkernel(float* result, float* data, int nx, int ny) {
 
     __syncthreads();
 
-    for(int x = 0; x < nx; x++){
+    for(int x = 0; x < nn; x+=64){
+        int j = ja + x;
         float square = (float)sqrt(squareSums[i]);
-        float newValue = (float)newData[x + i*nx] / square;
-        printf("%f ", data[x + i*nx]);
-        data[x + i*nx] = newValue;
+        float newValue = (float)processedData[j + i*nx] / square;
+        data[j + i*nx] = newValue;
     }
 
     __syncthreads();
     
-
-    delete[] newData;
     delete[] averageList;
     delete[] squareSums;
 }
@@ -93,10 +94,15 @@ static inline int roundup(int a, int b) {
 }
 
 void correlate(int ny, int nx, const float *data, float *result) {
+    int nn = roundup(ny, 64);
+
     float* dGPU = NULL;
     CHECK(cudaMalloc((void**)&dGPU, ny * nx * sizeof(float)));
     float* rGPU = NULL;
     CHECK(cudaMalloc((void**)&rGPU, ny * ny * sizeof(float)));
+    float* dProcessedGPU = NULL;
+    CHECK(cudaMalloc((void**)&dProcessedGPU, 2 * nn * nn * sizeof(float)));
+
     /*float *averageList = new float[ny];
     float *newData = new float[nx*ny];
     vector<float> squareSums(ny, 0);
@@ -131,19 +137,21 @@ void correlate(int ny, int nx, const float *data, float *result) {
     }*/
 	
     CHECK(cudaMemset(rGPU, 0, ny * ny * sizeof(float)));
+    CHECK(cudaMemset(dProcessedGPU, 0, 2 * nn * nn * sizeof(float)));
+
     CHECK(cudaMemcpy(dGPU, data, ny * nx * sizeof(float), cudaMemcpyHostToDevice));  
 
     {
         dim3 dimBlock(64, 1);
         dim3 dimGrid(1, 64);
-        myppkernel<<<dimGrid, dimBlock>>>(rGPU, dGPU, nx, ny);
+        myppkernel<<<dimGrid, dimBlock>>>(rGPU, dGPU, dProcessedGPU, nx, ny, nn);
         CHECK(cudaGetLastError());
     }
     // Run kernel
     {
     dim3 dimBlock(16, 16);
     dim3 dimGrid(divup(ny, dimBlock.x), divup(ny, dimBlock.y));
-    mykernel<<<dimGrid, dimBlock>>>(rGPU, dGPU, nx, ny);
+    mykernel<<<dimGrid, dimBlock>>>(rGPU, dProcessedGPU, nx, ny);
     CHECK(cudaGetLastError());
     }
     // Copy data back to CPU & release memory
