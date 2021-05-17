@@ -83,7 +83,7 @@ void correlate(int ny, int nx, const float *data, float *result) {
         for(int j = 0; j < nx; j++){
             double square = sqrt(squareSums[i]);
             double newValue = newData[j + i*nx] / square;
-            newData[j + i*nx] = newValue;
+            newData[j + i*nx] = (float)newValue;
         }
     }
     for(int i = 0; i < ny; i++){
@@ -93,7 +93,7 @@ void correlate(int ny, int nx, const float *data, float *result) {
     }
 
     CHECK(cudaMemset(rGPU, 0, ny * ny * sizeof(float)));
-    CHECK(cudaMemcpy(dGPU, newData, ny * nx * sizeof(double), cudaMemcpyHostToDevice));
+    CHECK(cudaMemcpy(dGPU, newData, ny * nx * sizeof(float), cudaMemcpyHostToDevice));
 
     // Run kernel
     dim3 dimBlock(16, 16);
