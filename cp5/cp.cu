@@ -93,7 +93,7 @@ void correlate(int ny, int nx, const float *data, float *result) {
     }
 
     CHECK(cudaMemset(rGPU, 0, ny * ny * sizeof(float)));
-    CHECK(cudaMemcpy(dGPU, newData, ny * nx * sizeof(float), cudaMemcpyHostToDevice));
+    CHECK(cudaMemcpy(dGPU, newData, ny * nx * sizeof(double), cudaMemcpyHostToDevice));
 
     // Run kernel
     dim3 dimBlock(16, 16);
