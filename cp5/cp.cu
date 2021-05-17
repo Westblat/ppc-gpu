@@ -133,7 +133,7 @@ void correlate(int ny, int nx, const float *data, float *result) {
     {
         dim3 dimBlock(64, 1);
         dim3 dimGrid(1, nn);
-        myppkernel<<<dimGrid, dimBlock>>>(rGPU, dGPU, n, nn);
+        myppkernel<<<dimGrid, dimBlock>>>(rGPU, dGPU, nx, ny);
         CHECK(cudaGetLastError());
     }
     // Run kernel
