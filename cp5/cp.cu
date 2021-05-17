@@ -28,7 +28,7 @@ __global__ void mykernel(float* result, const float* data, int nx, int ny) {
         //printf("%d i %d j ", data[x + i*nx], data[x + j*nx]);
         newValue += data[x + i*nx] * data[x + j*nx];
     }
-    result[i + j*ny] = newValue;
+    //result[i + j*ny] = newValue;
     printf("%f ", newValue);
 
 }
@@ -101,39 +101,6 @@ void correlate(int ny, int nx, const float *data, float *result) {
     CHECK(cudaMalloc((void**)&rGPU, ny * ny * sizeof(float)));
     float* dProcessedGPU = NULL;
     CHECK(cudaMalloc((void**)&dProcessedGPU, 2 * nn * nn * sizeof(float)));
-
-    /*float *averageList = new float[ny];
-    float *newData = new float[nx*ny];
-    vector<float> squareSums(ny, 0);
-
-    for(int i = 0; i < ny; i++){
-        float average = 0;
-        for(int j = 0; j < nx; j++){
-            average += (float)data[j + i*nx];
-        }
-        average = average / (float)nx;
-        averageList[i] = average;
-    
-    }
-
-    for(int i = 0; i < ny; i++){
-        float rowSquareSum = 0;
-        for(int j = 0; j < nx; j++){
-            float newValue = (float)data[j + i*nx] - averageList[i];
-            newData[j + i*nx] = newValue;
-            float square = newValue * newValue;
-            rowSquareSum += square;
-        }
-        squareSums[i] = rowSquareSum;
-    }
-
-    for(int i = 0; i < ny; i++){
-        for(int j = 0; j < nx; j++){
-            float square = (float)sqrt(squareSums[i]);
-            float newValue = newData[j + i*nx] / square;
-            newData[j + i*nx] = (float)newValue;
-        }
-    }*/
 	
     CHECK(cudaMemset(rGPU, 0, ny * ny * sizeof(float)));
     CHECK(cudaMemset(dProcessedGPU, 0, 2 * nn * nn * sizeof(float)));
@@ -154,7 +121,7 @@ void correlate(int ny, int nx, const float *data, float *result) {
     CHECK(cudaGetLastError());
     }
     // Copy data back to CPU & release memory
-    //CHECK(cudaMemcpy(result, rGPU, ny * ny * sizeof(float), cudaMemcpyDeviceToHost));
+    CHECK(cudaMemcpy(result, rGPU, ny * ny * sizeof(float), cudaMemcpyDeviceToHost));
     CHECK(cudaFree(dGPU));
     CHECK(cudaFree(dProcessedGPU));
     CHECK(cudaFree(rGPU));
