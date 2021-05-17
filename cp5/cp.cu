@@ -25,7 +25,7 @@ __global__ void mykernel(float* result, const float* data, int nx, int ny) {
     //printf("%d i %d j ", data[x + i*nx], data[x + j*nx);
     double newValue = 0;
     for(int x = 0; x < nx; x++){
-        printf("%d i %d j ", data[x + i*nx], data[x + j*nx]);
+        //printf("%d i %d j ", data[x + i*nx], data[x + j*nx]);
 
         newValue += data[x + i*nx] * data[x + j*nx];
     }
@@ -84,6 +84,11 @@ void correlate(int ny, int nx, const float *data, float *result) {
             double square = sqrt(squareSums[i]);
             double newValue = newData[j + i*nx] / square;
             newData[j + i*nx] = newValue;
+        }
+    }
+    for(int i = 0; i < ny; i++){
+        for(int j = 0; j < nx; j++){
+            cout << newData[j + i*ny] << endl;
         }
     }
 
