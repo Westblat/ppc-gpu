@@ -101,8 +101,8 @@ void correlate(int ny, int nx, const float *data, float *result) {
 	
     CHECK(cudaMemset(rGPU, 0, ny * ny * sizeof(float)));
     CHECK(cudaMemset(r2GPU, 0, nx * ny * sizeof(float)));
-    CHECK(cudaMemset(dOtherGPU, squareSums, ny * sizeof(float)));
-    CHECK(cudaMemset(dThirdGPU, newData, nx * ny * sizeof(float)));
+    CHECK(cudaMemset(dOtherGPU, 0, ny * sizeof(float)));
+    CHECK(cudaMemset(dThirdGPU, 0, nx * ny * sizeof(float)));
 
         // Run kernel
 {       
