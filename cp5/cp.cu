@@ -30,7 +30,14 @@ __global__ void mykernel(float* result, const float* data, int nx, int ny) {
     }
     result[i + j*ny] = newValue;
 }
+__global__ void myppkernel(float* result, const float* data, const float* otherData, int nx, int ny) {
+    int i = threadIdx.x;
+    int j = threadIdx.y;
+    float square = (float)sqrt(data[i]);
+    float newValue = otherData[j + i*nx] / square;
+    result[j + i*nx] = (float)newValue;
 
+}
 
 static inline void check(cudaError_t err, const char* context) {
     if (err != cudaSuccess) {
@@ -54,9 +61,9 @@ void correlate(int ny, int nx, const float *data, float *result) {
     CHECK(cudaMalloc((void**)&dGPU, ny * nx * sizeof(float)));
     float* rGPU = NULL;
     CHECK(cudaMalloc((void**)&rGPU, ny * ny * sizeof(float)));
-    vector<float> averageList(ny, 0);
+    float *averageList = new float[ny];
     float *newData = new float[nx*ny];
-    vector<float> squareSums(ny, 0);
+    float *newData = squareSums[ny];
 
     for(int i = 0; i < ny; i++){
         float average = 0;
@@ -64,7 +71,7 @@ void correlate(int ny, int nx, const float *data, float *result) {
             average += (float)data[j + i*nx];
         }
         average = average / (float)nx;
-        averageList[i] = average;
+        averageList[i] = average;    
     }
 
     for(int i = 0; i < ny; i++){
@@ -78,23 +85,34 @@ void correlate(int ny, int nx, const float *data, float *result) {
         squareSums[i] = rowSquareSum;
     }
 
-    for(int i = 0; i < ny; i++){
+    /*for(int i = 0; i < ny; i++){
         for(int j = 0; j < nx; j++){
-            float square = (float)sqrt(squareSums[i]);
-            float newValue = newData[j + i*nx] / square;
-            newData[j + i*nx] = (float)newValue;
         }
-    }
+    }*/
 	
     CHECK(cudaMemset(rGPU, 0, ny * ny * sizeof(float)));
-    CHECK(cudaMemcpy(dGPU, newData, ny * nx * sizeof(float), cudaMemcpyHostToDevice));
+    CHECK(cudaMemset(r2GPU, 0, nx * ny * sizeof(float)));
+    CHECK(cudaMemset(dOtherGPU, squareSums, ny * sizeof(float)));
+    CHECK(cudaMemset(dThirdGPU, newData, nx * ny * sizeof(float)));
+
+        // Run kernel
+{       
+    dim3 dimBlock(16, 16);
+    dim3 dimGrid(divup(ny, dimBlock.x), divup(ny, dimBlock.y));
+    myppkernel<<<dimGrid, dimBlock>>>(rGPU, dOtherGPU, newData, nx, ny);
+    CHECK(cudaGetLastError());
+}   
+CHECK(cudaMemcpy(newData, r2GPU, nx * ny * sizeof(float), cudaMemcpyDeviceToHost));
+CHECK(cudaMemcpy(dGPU, newData, ny * nx * sizeof(float), cudaMemcpyHostToDevice));
+
 
     // Run kernel
+    {
     dim3 dimBlock(16, 16);
     dim3 dimGrid(divup(ny, dimBlock.x), divup(ny, dimBlock.y));
     mykernel<<<dimGrid, dimBlock>>>(rGPU, dGPU, nx, ny);
     CHECK(cudaGetLastError());
-
+    }
     // Copy data back to CPU & release memory
     CHECK(cudaMemcpy(result, rGPU, ny * ny * sizeof(float), cudaMemcpyDeviceToHost));
     CHECK(cudaFree(dGPU));
