@@ -23,11 +23,11 @@ __global__ void mykernel(float* result, const float* data, int nx, int ny) {
     return;
     float size = nx;
     //printf("%d j %d i", j, i);
-        double newValue = 0;
-        for(int x = 0; x < nx; x++){
-            newValue += data[x + i*nx] * data[x + j*nx];
-        }
-        result[j + i*ny] = newValue;
+    double newValue = 0;
+    for(int x = 0; x < nx; x++){
+        newValue += data[x + i*nx] * data[x + j*nx];
+    }
+    result[i + j*ny] = newValue;
 }
 
 
