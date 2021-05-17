@@ -66,6 +66,7 @@ __global__ void myppkernel(float* result, const float* data, int nx, int ny) {
     }
 
     __syncthreads();
+    printf("Moi");
 
     delete[] newData;
     delete[] averageList;
