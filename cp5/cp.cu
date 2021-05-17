@@ -30,7 +30,6 @@ __global__ void mykernel(float* result, const float* data, int nx, int ny) {
         }
         result[y + i*ny] = newValue;
     }
-    result[y + i*ny] = newValue;
 
     /*double sumI = 0;
     double sumJ = 0;
