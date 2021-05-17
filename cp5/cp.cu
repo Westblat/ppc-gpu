@@ -22,11 +22,10 @@ __global__ void mykernel(float* result, const float* data, int nx, int ny) {
     if (i >= ny || j >= ny || j > i)
     return;
     float size = nx;
-    //printf("%d i %d j ", data[x + i*nx], data[x + j*nx);
+    printf("%d i %d j ", i, j);
     double newValue = 0;
     for(int x = 0; x < nx; x++){
         //printf("%d i %d j ", data[x + i*nx], data[x + j*nx]);
-
         newValue += data[x + i*nx] * data[x + j*nx];
     }
     result[i + j*ny] = newValue;
@@ -86,12 +85,7 @@ void correlate(int ny, int nx, const float *data, float *result) {
             newData[j + i*nx] = (float)newValue;
         }
     }
-    for(int i = 0; i < ny; i++){
-        for(int j = 0; j < nx; j++){
-            cout << newData[j + i*ny] << endl;
-        }
-    }
-
+	
     CHECK(cudaMemset(rGPU, 0, ny * ny * sizeof(float)));
     CHECK(cudaMemcpy(dGPU, newData, ny * nx * sizeof(float), cudaMemcpyHostToDevice));
 
