@@ -131,7 +131,7 @@ void correlate(int ny, int nx, const float *data, float *result) {
     }
     // Run kernel
     {
-    dim3 dimBlock(8, 8);
+    dim3 dimBlock(16, 16);
     dim3 dimGrid(divup(ny, dimBlock.x), divup(ny, dimBlock.y));
     //dim3 dimGrid( nn / 64, nn / 64);
     mykernel<<<dimGrid, dimBlock>>>(rGPU, dProcessedGPU, nx, ny, nn);
