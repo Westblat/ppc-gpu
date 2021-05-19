@@ -19,30 +19,28 @@ using namespace std;
 __global__ void mykernel(float* result, const float* data, int nx, int ny) {
     int i = threadIdx.x + blockIdx.x * blockDim.x;
     int j = threadIdx.y + blockIdx.y * blockDim.y;
-    printf("Hello");
     if (i >= ny || j >= ny || j > i)
     return;
     //printf("%d i %d j ", i, j);
     double newValue = 0;
-    for(int x = 0; x < nx; x++){
+    for(int x = 0; x < ny; x++){
         //printf("%d i %d j ", data[x + i*nx], data[x + j*nx]);
-        newValue += data[x + i*nx] * data[x + j*nx];
+        newValue += data[i + x*ny] * data[x + j*ny];
     }
-    //result[i + j*ny] = newValue;
-    printf("%f ", newValue);
+    result[i + j*ny] = newValue;
 
 }
 __global__ void myppkernel(float* result, float* data, float* processedData, int nx, int ny, int nn) {
-    //int i = blockIdx.y;
+    int ja = blockIdx.y;
     int i = threadIdx.x;
     float *averageList = new float[ny];
     float *squareSums = new float[ny];
-    // newData pitää koko data array, nyt pelkän blokin
-    // j == 1 / 64 osa rivistä 
+
     printf("%i thread ", i);
     float average = 0;
-    for(int x = 0; x < nx; x++){
-        average += (float)data[x + i*nx];
+    for(int x = 0; x < nn; x+=64){
+        int j = ja + x;
+        average += (float)data[j + i*nn];
     }
     float averageCalculated = average / (float)nx;
     averageList[i] = averageCalculated;
@@ -50,9 +48,10 @@ __global__ void myppkernel(float* result, float* data, float* processedData, int
     __syncthreads();
 
     float rowSquareSum = 0;
-    for(int x = 0; x < nx; x++){
-        float newValue = (float)data[x + i*nx] - averageList[i];
-        processedData[x + i*nx] = newValue;
+    for(int x = 0; x < nn; x+=64){
+        int j = ja + x;
+        float newValue = (float)data[j + i*nn] - averageList[i];
+        processedData[j + i*nn] = newValue;
         float square = newValue * newValue;
         rowSquareSum += square;
     }
@@ -61,11 +60,12 @@ __global__ void myppkernel(float* result, float* data, float* processedData, int
     __syncthreads();
     
     float* t = processedData + nn * nn;
-    for(int x = 0; x < nx; x++){
+    for(int x = 0; x < nn; x+=64){
+        int j = ja + x;
         float square = (float)sqrt(squareSums[i]);
-        float newValue = (float)processedData[x + i*nx] / square;
-        processedData[x + i*nx] = newValue;
-        t[i + x*nx] = newValue;
+        float newValue = (float)processedData[j + i*nn] / square;
+        processedData[j + i*nn] = newValue;
+        t[i + x*nn] = newValue;
     }
 
     __syncthreads();
