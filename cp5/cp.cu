@@ -78,12 +78,10 @@ __global__ void myppkernel(float* result, float* data, float* processedData, int
 
     for(int x = 0; x < nn; x+=64){
         int j = ja + x;
-        if(j < nx) {
-            float square = (float)sqrt(squareSumCalculated);
-            float newValue = (float)processedData[j + i*nn] / square;
-            processedData[j + i*nn] = newValue;
-            t[i + j*nn] = newValue;
-        }
+        float square = (float)sqrt(squareSumCalculated);
+        float newValue = (float)processedData[j + i*nn] / square;
+        processedData[j + i*nn] = newValue;
+        t[i + j*nn] = newValue;
     }
 
     __syncthreads();
