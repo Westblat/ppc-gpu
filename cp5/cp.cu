@@ -16,7 +16,7 @@ This is the function you need to implement. Quick reference:
 using namespace std;
 
 
-__global__ void mykernel(float* result, const float* data, int nx, int ny) {
+__global__ void mykernel(float* result, const float* data, int nx, int ny, int nn) {
     int i = threadIdx.x + blockIdx.x * blockDim.x;
     int j = threadIdx.y + blockIdx.y * blockDim.y;
     if (i >= ny || j >= ny || j > i)
@@ -126,7 +126,7 @@ void correlate(int ny, int nx, const float *data, float *result) {
     dim3 dimBlock(8, 8);
     dim3 dimGrid(divup(ny, dimBlock.x), divup(ny, dimBlock.y));
     //dim3 dimGrid( nn / 64, nn / 64);
-    mykernel<<<dimGrid, dimBlock>>>(rGPU, dProcessedGPU, nx, ny);
+    mykernel<<<dimGrid, dimBlock>>>(rGPU, dProcessedGPU, nx, ny, nn);
     CHECK(cudaGetLastError());
     }
     // Copy data back to CPU & release memory
