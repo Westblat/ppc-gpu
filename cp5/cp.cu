@@ -33,36 +33,47 @@ __global__ void mykernel(float* result, const float* data, int nx, int ny) {
 __global__ void myppkernel(float* result, float* data, float* processedData, int nx, int ny, int nn) {
     int ja = threadIdx.x;
     int i = blockIdx.y;
-    float *averageList = new float[ny];
-    float *squareSums = new float[ny];
+    
+    __shared__ float tempArray[64];
 
-    printf("%i thread ", i);
-    float average = 0;
+    float tempArray[ja] = 0;
     for(int x = 0; x < nn; x+=64){
         int j = ja + x;
-        average += (float)data[j + i*nn];
+        tempArray[ja] += data[j + i*nn];
     }
-    float averageCalculated = average / (float)nx;
-    averageList[i] = averageCalculated;
-    printf("%f average ", average);
     __syncthreads();
 
-    float rowSquareSum = 0;
+    float averageCalculated = 0;
+    for (int x = 0; x < 64; x++) {
+        averageCalculated += tempArray[x];
+    }
+    averageCalculated = averageCalculated / nx;
+    
+    __syncthreads();
+
+    tempArray[ja] = 0;
     for(int x = 0; x < nn; x+=64){
         int j = ja + x;
-        float newValue = (float)data[j + i*nn] - averageList[i];
+        float newValue = (float)data[j + i*nn] - averageCalculated;
         processedData[j + i*nn] = newValue;
         float square = newValue * newValue;
-        rowSquareSum += square;
+        tempArray[ja] += square;
     }
-    squareSums[i] = rowSquareSum;
 
+    __syncthreads();
+
+    float squareSumCalculated = 0;
+    for (int x = 0; x < 64; x++) {
+        squareSumCalculated += tempArray[x];
+    }
+    
     __syncthreads();
     
     float* t = processedData + nn * nn;
+
     for(int x = 0; x < nn; x+=64){
         int j = ja + x;
-        float square = (float)sqrt(squareSums[i]);
+        float square = (float)sqrt(squareSumCalculated);
         float newValue = (float)processedData[j + i*nn] / square;
         processedData[j + i*nn] = newValue;
         t[i + x*nn] = newValue;
@@ -70,8 +81,6 @@ __global__ void myppkernel(float* result, float* data, float* processedData, int
 
     __syncthreads();
     
-    delete[] averageList;
-    delete[] squareSums;
 }
 
 static inline void check(cudaError_t err, const char* context) {
@@ -92,7 +101,8 @@ static inline int roundup(int a, int b) {
 }
 
 void correlate(int ny, int nx, const float *data, float *result) {
-    int nn = roundup(ny, 64);
+    int nMax = max(ny, nx);
+    int nn = roundup(nMax, 64);
 
     float* dGPU = NULL;
     CHECK(cudaMalloc((void**)&dGPU, ny * nx * sizeof(float)));
