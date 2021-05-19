@@ -46,7 +46,7 @@ __global__ void myppkernel(float* result, float* data, float* processedData, int
     }
     float averageCalculated = average / (float)nx;
     averageList[i] = averageCalculated;
-    printf("%f average ", average)
+    printf("%f average ", average);
     __syncthreads();
 
     float rowSquareSum = 0;
