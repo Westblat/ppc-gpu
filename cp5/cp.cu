@@ -21,7 +21,6 @@ __global__ void mykernel(float* result, const float* data, int nx, int ny, int n
     int j = threadIdx.y + blockIdx.y * blockDim.y;
     if (i >= ny || j >= ny || j > i)
     return;
-    //printf("%d i %d j ", i, j);
     float newValue = 0;
     for(int x = 0; x < nx; x++){
         newValue += data[x + i*nn] * data[x + j*nn];
@@ -67,7 +66,9 @@ __global__ void myppkernel(float* result, float* data, float* processedData, int
     }
     
     __syncthreads();
-    
+    if(squareSumCalculated == 0) {
+        squareSumCalculated = 1;
+    }
     float* t = processedData + nn * nn;
 
     for(int x = 0; x < nn; x+=64){
