@@ -21,13 +21,14 @@ __global__ void mykernel(float* result, const float* data, int nx, int ny, int n
     int j = threadIdx.y + blockIdx.y * blockDim.y;
     if (i >= ny || j >= ny || j > i)
     return;
+    const float* t = d + nn * nn;
     float newValue = 0;
     for(int x = 0; x < nx; x++){
-        newValue += data[x + i*nn] * data[j + x*nn];
+        newValue += t[i + x*nn] * data[x + j*nn];
     }
     result[i + j*ny] = newValue;
-
 }
+
 __global__ void myppkernel(float* result, float* data, float* processedData, int nx, int ny, int nn) {
     int ja = threadIdx.x;
     int i = blockIdx.y;
