@@ -36,7 +36,7 @@ __global__ void myppkernel(float* result, float* data, float* processedData, int
     
     __shared__ float tempArray[64];
 
-    float tempArray[ja] = 0;
+    tempArray[ja] = 0;
     for(int x = 0; x < nn; x+=64){
         int j = ja + x;
         tempArray[ja] += data[j + i*nn];
