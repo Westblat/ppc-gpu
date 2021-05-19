@@ -82,7 +82,7 @@ __global__ void myppkernel(float* result, float* data, float* processedData, int
             float square = (float)sqrt(squareSumCalculated);
             float newValue = (float)processedData[j + i*nn] / square;
             processedData[j + i*nn] = newValue;
-            t[i + x*nn] = newValue;
+            t[i + j*nn] = newValue;
         }
     }
 
