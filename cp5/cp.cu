@@ -55,7 +55,7 @@ __global__ void myppkernel(float* result, float* data, float* processedData, int
     for(int x = 0; x < nn; x+=64){
         int j = ja + x;
         float newValue = j < nx ? (float)data[j + i*nx] - averageCalculated : 0;
-        processedData[j + i*nx] = newValue;
+        processedData[j + i*nn] = newValue;
         float square = newValue * newValue;
         tempArray[ja] += square;    
     }
