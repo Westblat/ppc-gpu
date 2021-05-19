@@ -39,7 +39,7 @@ __global__ void myppkernel(float* result, float* data, float* processedData, int
     float *squareSums = new float[ny];
     // newData pitää koko data array, nyt pelkän blokin
     // j == 1 / 64 osa rivistä 
-    printf("%i thread ", thread);
+    printf("%i thread ", i);
     float average = 0;
     for(int x = 0; x < nx; x++){
         average += (float)data[x + i*nx];
