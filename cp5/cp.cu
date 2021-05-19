@@ -21,7 +21,7 @@ __global__ void mykernel(float* result, const float* data, int nx, int ny, int n
     int j = threadIdx.y + blockIdx.y * blockDim.y;
     if (i >= ny || j >= ny || j > i)
     return;
-    const float* t = d + nn * nn;
+    const float* t = data + nn * nn;
     float newValue = 0;
     for(int x = 0; x < nx; x++){
         newValue += t[i + x*nn] * data[x + j*nn];
