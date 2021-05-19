@@ -31,8 +31,8 @@ __global__ void mykernel(float* result, const float* data, int nx, int ny) {
 
 }
 __global__ void myppkernel(float* result, float* data, float* processedData, int nx, int ny, int nn) {
-    int ja = threadIdx.y;
-    int i = blockIdx.x;
+    int ja = threadIdx.x;
+    int i = blockIdx.y;
     float *averageList = new float[ny];
     float *squareSums = new float[ny];
 
