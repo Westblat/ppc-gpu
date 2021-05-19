@@ -37,7 +37,7 @@ __global__ void myppkernel(float* result, float* data, float* processedData, int
     tempArray[ja] = 0;
     for(int x = 0; x < nn; x+=64){
         int j = ja + x;
-        tempArray[ja] += data[j + i*nx];
+        tempArray[ja] += j < nx ? data[j + i*nx] : 0;
     }
     __syncthreads();
 
@@ -54,10 +54,10 @@ __global__ void myppkernel(float* result, float* data, float* processedData, int
     tempArray[ja] = 0;
     for(int x = 0; x < nn; x+=64){
         int j = ja + x;
-        float newValue = (float)data[j + i*nx] - averageCalculated;
+        float newValue = j < nx ? (float)data[j + i*nx] - averageCalculated : 0;
         processedData[j + i*nx] = newValue;
         float square = newValue * newValue;
-        tempArray[ja] += square;
+        tempArray[ja] += square;    
     }
 
     __syncthreads();
@@ -78,10 +78,12 @@ __global__ void myppkernel(float* result, float* data, float* processedData, int
 
     for(int x = 0; x < nn; x+=64){
         int j = ja + x;
-        float square = (float)sqrt(squareSumCalculated);
-        float newValue = (float)processedData[j + i*nn] / square;
-        processedData[j + i*nn] = newValue;
-        t[i + x*nn] = newValue;
+        if(j < nx) {
+            float square = (float)sqrt(squareSumCalculated);
+            float newValue = (float)processedData[j + i*nn] / square;
+            processedData[j + i*nn] = newValue;
+            t[i + x*nn] = newValue;
+        }
     }
 
     __syncthreads();
