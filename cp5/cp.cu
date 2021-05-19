@@ -22,8 +22,8 @@ __global__ void mykernel(float* result, const float* data, int nx, int ny, int n
     if (i >= ny || j >= ny || j > i)
     return;
     float newValue = 0;
-    for(int x = 0; x < nn; x++){
-        newValue += data[i + x*nn] * data[x + j*nn];
+    for(int x = 0; x < nx; x++){
+        newValue += data[i + x*nn] * data[j + x*nn];
     }
     result[i + j*ny] = newValue;
 
