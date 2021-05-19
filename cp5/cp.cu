@@ -46,9 +46,7 @@ __global__ void myppkernel(float* result, float* data, float* processedData, int
         averageCalculated += tempArray[x];
     }
     averageCalculated = averageCalculated / nx;
-    if(ja < nx && i < ny){
-    printf("average %f %i %i \n", averageCalculated, ja, i);
-    }
+
     __syncthreads();
 
     tempArray[ja] = 0;
@@ -68,9 +66,7 @@ __global__ void myppkernel(float* result, float* data, float* processedData, int
     }
     
     __syncthreads();
-    if(ja < nx && i < ny){
-        printf("squareSumCalculated %f %i %i \n", squareSumCalculated, ja, i);
-    }
+
     if(squareSumCalculated == 0) {
         squareSumCalculated = 1;
     }
