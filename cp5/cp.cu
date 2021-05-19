@@ -33,28 +33,26 @@ __global__ void mykernel(float* result, const float* data, int nx, int ny) {
 
 }
 __global__ void myppkernel(float* result, float* data, float* processedData, int nx, int ny, int nn) {
-    int i = blockIdx.y;
-    int ja = threadIdx.x;
+    //int i = blockIdx.y;
+    int i = threadIdx.x;
     float *averageList = new float[ny];
     float *squareSums = new float[ny];
     // newData pitää koko data array, nyt pelkän blokin
     // j == 1 / 64 osa rivistä 
     
     float average = 0;
-    for(int x = 0; x < nn; x+=64){
-        int j = ja + x;
-        average += (float)data[j + i*nn];
+    for(int x = 0; x < nx; x++){
+        average += (float)data[x + i*nx];
     }
-    average = average / (float)nn;
-    averageList[i] = average;
+    float averageCalculated = average / (float)nx;
+    averageList[i] = averageCalculated;
     printf("%f average ", average)
     __syncthreads();
 
     float rowSquareSum = 0;
-    for(int x = 0; x < nn; x+=64){
-        int j = ja + x;
-        float newValue = (float)data[j + i*nn] - averageList[i];
-        processedData[j + i*nn] = newValue;
+    for(int x = 0; x < nx; x++){
+        float newValue = (float)data[x + i*nx] - averageList[i];
+        processedData[x + i*nx] = newValue;
         float square = newValue * newValue;
         rowSquareSum += square;
     }
@@ -63,12 +61,11 @@ __global__ void myppkernel(float* result, float* data, float* processedData, int
     __syncthreads();
     
     float* t = processedData + nn * nn;
-    for(int x = 0; x < nn; x+=64){
-        int j = ja + x;
+    for(int x = 0; x < nx; x++){
         float square = (float)sqrt(squareSums[i]);
-        float newValue = (float)processedData[j + i*nn] / square;
-        processedData[j + i*nn] = newValue;
-        t[i + j*nn] = newValue;
+        float newValue = (float)processedData[x + i*nx] / square;
+        processedData[x + i*nx] = newValue;
+        t[i + x*nx] = newValue;
     }
 
     __syncthreads();
