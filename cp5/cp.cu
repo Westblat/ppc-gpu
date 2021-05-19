@@ -47,7 +47,7 @@ __global__ void myppkernel(float* result, float* data, float* processedData, int
     }
     average = average / (float)nn;
     averageList[i] = average;
-
+    printf("%f average ", average)
     __syncthreads();
 
     float rowSquareSum = 0;
@@ -61,6 +61,7 @@ __global__ void myppkernel(float* result, float* data, float* processedData, int
     squareSums[i] = rowSquareSum;
 
     __syncthreads();
+    
     float* t = processedData + nn * nn;
     for(int x = 0; x < nn; x+=64){
         int j = ja + x;
